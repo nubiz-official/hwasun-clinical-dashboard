@@ -189,7 +189,7 @@ with st.sidebar:
 
     page = st.radio(
         "메뉴",
-        ["종합 대시보드", "SWOT 분석", "시장 분석", "리스크 분석", "전략 제언"],
+        ["종합 대시보드", "SWOT 분석", "시장 분석", "리스크 분석", "전략 제언", "🧬 디지털 트윈", "🔬 3대 플랫폼"],
         label_visibility="collapsed",
     )
 
@@ -898,6 +898,202 @@ def page_strategy():
 
 
 # ═══════════════════════════════════════════════════
+# 디지털 트윈 페이지
+# ═══════════════════════════════════════════════════
+
+DIGITAL_TWIN_OOC = [
+    {"organ": "간 (Liver)", "icon": "🫁", "status": "프로토타입", "progress": 65, "color": "#00c2a8",
+     "features": ["간독성 약물 스크리닝", "CYP450 대사 모델링", "담즙 분비 모사"],
+     "fda": "FDA ISTAND 2024년 최초 수용", "market": "$3.2억(2030)"},
+    {"organ": "신장 (Kidney)", "icon": "🫘", "status": "개발중", "progress": 45, "color": "#8b5cf6",
+     "features": ["신독성 평가", "약물 배설 시뮬레이션", "사구체 여과 모사"],
+     "fda": "FDA 가이드라인 검토중", "market": "$2.1억(2030)"},
+    {"organ": "심장 (Heart)", "icon": "❤️", "status": "개발중", "progress": 40, "color": "#ef4444",
+     "features": ["심독성(QT 연장) 평가", "심근 수축 모니터링", "부정맥 모델링"],
+     "fda": "식약처 Pre-submission 추진", "market": "$1.8억(2030)"},
+    {"organ": "장 (Intestine)", "icon": "🔄", "status": "설계", "progress": 20, "color": "#e8b84b",
+     "features": ["약물 흡수 평가", "마이크로바이옴 연동", "장벽 투과성 분석"],
+     "fda": "연구단계", "market": "$1.2억(2030)"},
+    {"organ": "피부 (Skin)", "icon": "🖐️", "status": "설계", "progress": 15, "color": "#f97316",
+     "features": ["피부 자극 시험", "경피 흡수 평가", "광독성 시험"],
+     "fda": "연구단계", "market": "$1.1억(2030)"},
+]
+
+DT_PKPD_DEMO = [
+    {"time_h": 0, "plasma_conc": 0, "efficacy": 0, "toxicity": 0},
+    {"time_h": 1, "plasma_conc": 85, "efficacy": 15, "toxicity": 5},
+    {"time_h": 2, "plasma_conc": 100, "efficacy": 45, "toxicity": 12},
+    {"time_h": 4, "plasma_conc": 78, "efficacy": 72, "toxicity": 18},
+    {"time_h": 8, "plasma_conc": 52, "efficacy": 85, "toxicity": 22},
+    {"time_h": 12, "plasma_conc": 35, "efficacy": 78, "toxicity": 20},
+    {"time_h": 24, "plasma_conc": 18, "efficacy": 55, "toxicity": 14},
+    {"time_h": 48, "plasma_conc": 5, "efficacy": 30, "toxicity": 6},
+]
+
+
+def page_digital_twin():
+    st.markdown("## 디지털 트윈 — Organ-on-Chip & PK/PD 시뮬레이션")
+    st.markdown("<span style='color:#9ca3af;font-size:0.85rem;'>K-COSMOS 플랫폼 | 5개 장기 모사 칩 | FDA ISTAND 규제 경로</span>", unsafe_allow_html=True)
+    st.markdown("")
+
+    # OoC 시장 메트릭
+    m1, m2, m3 = st.columns(3)
+    for col, val, label, color in [
+        (m1, "$9.5억", "OoC 시장 2030", "#00c2a8"),
+        (m2, "30~40%", "CAGR", "#8b5cf6"),
+        (m3, "5개", "목표 장기 칩", "#e8b84b"),
+    ]:
+        with col:
+            st.markdown(f'''<div style="background:#101828;border:1px solid #1e293b;border-radius:10px;padding:14px;text-align:center;">
+                <div style="font-size:1.5rem;font-weight:900;color:{color};">{val}</div>
+                <div style="font-size:0.72rem;color:#6b7280;">{label}</div>
+            </div>''', unsafe_allow_html=True)
+    st.markdown("")
+
+    # 장기별 카드
+    st.markdown("### Organ-on-Chip 개발 현황")
+    for ooc in DIGITAL_TWIN_OOC:
+        bar_w = ooc["progress"]
+        st.markdown(f'''
+        <div style="background:linear-gradient(135deg,#0c1220,#101828);border:1px solid #1e293b;
+                    border-left:4px solid {ooc["color"]};border-radius:12px;padding:16px 18px;margin:8px 0;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <span style="font-size:1.2rem;">{ooc["icon"]}</span>
+                    <span style="color:#e8eaf2;font-weight:700;font-size:0.95rem;margin-left:8px;">{ooc["organ"]}</span>
+                    <span style="background:{ooc["color"]}20;border:1px solid {ooc["color"]}40;border-radius:12px;padding:2px 10px;font-size:0.7rem;color:{ooc["color"]};margin-left:8px;">{ooc["status"]}</span>
+                </div>
+                <span style="color:{ooc["color"]};font-weight:700;font-size:0.85rem;">{ooc["market"]}</span>
+            </div>
+            <div style="display:flex;gap:8px;margin:8px 0;flex-wrap:wrap;">
+                {"".join(f'<span style="font-size:0.7rem;color:#9ca3af;background:#1a2540;border-radius:6px;padding:2px 8px;">{f}</span>' for f in ooc["features"])}
+            </div>
+            <div style="background:#1a2540;border-radius:6px;height:12px;overflow:hidden;margin:6px 0;">
+                <div style="width:{bar_w}%;background:{ooc["color"]};height:100%;border-radius:6px;"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.7rem;">
+                <span style="color:#6b7280;">{ooc["fda"]}</span>
+                <span style="color:{ooc["color"]};font-weight:600;">{bar_w}%</span>
+            </div>
+        </div>''', unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # PK/PD 시뮬레이션
+    st.markdown("### PK/PD 시뮬레이션 — 약물동태/약력학 디지털 트윈")
+    fig_pk = go.Figure()
+    times = [d["time_h"] for d in DT_PKPD_DEMO]
+    fig_pk.add_trace(go.Scatter(x=times, y=[d["plasma_conc"] for d in DT_PKPD_DEMO],
+        name="혈중 농도", mode="lines+markers", line=dict(color="#00c2a8", width=3),
+        marker=dict(size=6), fill="tozeroy", fillcolor="rgba(0,194,168,0.1)"))
+    fig_pk.add_trace(go.Scatter(x=times, y=[d["efficacy"] for d in DT_PKPD_DEMO],
+        name="효능 지수", mode="lines+markers", line=dict(color="#8b5cf6", width=3, dash="dot"),
+        marker=dict(size=6)))
+    fig_pk.add_trace(go.Scatter(x=times, y=[d["toxicity"] for d in DT_PKPD_DEMO],
+        name="독성 지수", mode="lines+markers", line=dict(color="#ef4444", width=2, dash="dash"),
+        marker=dict(size=5)))
+    fig_pk.add_hrect(y0=20, y1=100, fillcolor="rgba(239,68,68,0.05)", line_width=0,
+                     annotation_text="독성 경계", annotation_position="top right",
+                     annotation_font_color="#ef4444")
+    fig_pk.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Noto Sans KR", color="#e8eaf2"),
+        height=350, xaxis=dict(title="시간 (h)", gridcolor="#1e293b"),
+        yaxis=dict(title="지수 (%)", gridcolor="#1e293b"),
+        legend=dict(orientation="h", y=-0.18, x=0.5, xanchor="center"),
+        margin=dict(l=50, r=20, t=20, b=50),
+    )
+    st.plotly_chart(fig_pk, use_container_width=True)
+
+
+# ═══════════════════════════════════════════════════
+# 3대 플랫폼 페이지
+# ═══════════════════════════════════════════════════
+
+PLATFORMS = [
+    {
+        "name": "K-PRISM", "subtitle": "RWD → RWE 전환 플랫폼",
+        "color": "#00c2a8", "icon": "📊",
+        "desc": "다기관 의료데이터를 실제임상근거(RWE)로 전환하는 데이터 통합 플랫폼",
+        "tech": ["HL7 FHIR", "OMOP CDM", "연합학습(FL)", "바이오뱅크"],
+        "kpi": [("CDM 변환 기관", "7개"), ("데이터셋", "4만명+"), ("연합학습 프로토콜", "1차년도")],
+        "budget": "59.6억원/년",
+    },
+    {
+        "name": "K-COSMOS", "subtitle": "디지털 트윈 약물안전성 플랫폼",
+        "color": "#8b5cf6", "icon": "🧬",
+        "desc": "Organ-on-Chip + PK/PD 시뮬레이션으로 동물실험 없이 약물 안전성 평가",
+        "tech": ["Organ-on-Chip", "3D 바이오프린팅", "XAI", "PK/PD 모델링"],
+        "kpi": [("장기 칩", "5개"), ("비임상시험", "40건"), ("FDA ISTAND", "간독성 수용")],
+        "budget": "통합 운영",
+    },
+    {
+        "name": "K-MAESTRO", "subtitle": "AI 전주기 임상시험 플랫폼",
+        "color": "#e8b84b", "icon": "🤖",
+        "desc": "AI 기반 임상시험 설계·수행·분석 자동화 + DCT + 메타버스 센터",
+        "tech": ["적응적 임상설계", "DCT", "메타버스", "AI 매칭", "강화학습"],
+        "kpi": [("임상시험", "17건"), ("DCT 시장", "$186억(2030)"), ("인력양성", "100명")],
+        "budget": "통합 운영",
+    },
+]
+
+
+def page_platforms():
+    st.markdown("## 3대 플랫폼 — K-PRISM · K-COSMOS · K-MAESTRO")
+    st.markdown("<span style='color:#9ca3af;font-size:0.85rem;'>K-HOPE 핵심 인프라 | 178.7억원(3년) | 7개 공동연구기관 | 80명+ 연구진</span>", unsafe_allow_html=True)
+    st.markdown("")
+
+    for pf in PLATFORMS:
+        tech_tags = "".join(f'<span style="background:{pf["color"]}15;border:1px solid {pf["color"]}30;border-radius:6px;padding:3px 10px;font-size:0.7rem;color:{pf["color"]};">{t}</span>' for t in pf["tech"])
+        kpi_html = "".join(f'<div style="text-align:center;"><div style="font-size:1rem;font-weight:800;color:{pf["color"]};">{v}</div><div style="font-size:0.68rem;color:#6b7280;">{k}</div></div>' for k, v in pf["kpi"])
+
+        st.markdown(f'''
+        <div style="background:linear-gradient(135deg,#0c1220,#101828);border:1px solid #1e293b;
+                    border-top:3px solid {pf["color"]};border-radius:14px;padding:22px;margin:12px 0;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;">
+                <div>
+                    <span style="font-size:1.3rem;">{pf["icon"]}</span>
+                    <span style="color:{pf["color"]};font-weight:900;font-size:1.1rem;margin-left:8px;">{pf["name"]}</span>
+                    <span style="color:#9ca3af;font-size:0.82rem;margin-left:8px;">{pf["subtitle"]}</span>
+                </div>
+                <span style="color:#6b7280;font-size:0.78rem;">{pf["budget"]}</span>
+            </div>
+            <div style="color:#c9cdd5;font-size:0.82rem;margin:10px 0;">{pf["desc"]}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0;">{tech_tags}</div>
+            <div style="display:flex;gap:20px;justify-content:center;margin-top:14px;padding-top:12px;border-top:1px solid #1e293b;">
+                {kpi_html}
+            </div>
+        </div>''', unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # 3대 플랫폼 연계 흐름
+    st.markdown("### 플랫폼 연계 데이터 흐름")
+    st.markdown(f'''
+    <div style="background:#101828;border:1px solid #1e293b;border-radius:14px;padding:24px;text-align:center;">
+        <div style="display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;">
+            <div style="background:#00c2a820;border:2px solid #00c2a8;border-radius:12px;padding:14px 20px;">
+                <div style="font-weight:800;color:#00c2a8;">K-PRISM</div>
+                <div style="font-size:0.72rem;color:#9ca3af;">RWD 수집·표준화</div>
+            </div>
+            <div style="font-size:1.5rem;color:#4b5563;">→</div>
+            <div style="background:#8b5cf620;border:2px solid #8b5cf6;border-radius:12px;padding:14px 20px;">
+                <div style="font-weight:800;color:#8b5cf6;">K-COSMOS</div>
+                <div style="font-size:0.72rem;color:#9ca3af;">디지털 트윈 검증</div>
+            </div>
+            <div style="font-size:1.5rem;color:#4b5563;">→</div>
+            <div style="background:#e8b84b20;border:2px solid #e8b84b;border-radius:12px;padding:14px 20px;">
+                <div style="font-weight:800;color:#e8b84b;">K-MAESTRO</div>
+                <div style="font-size:0.72rem;color:#9ca3af;">AI 임상시험 수행</div>
+            </div>
+        </div>
+        <div style="margin-top:14px;font-size:0.78rem;color:#6b7280;">
+            환자 데이터(4만명+) → OoC 약물안전성 → AI 임상설계/DCT → 개인맞춤 치료
+        </div>
+    </div>''', unsafe_allow_html=True)
+
+
+# ═══════════════════════════════════════════════════
 # Page Router
 # ═══════════════════════════════════════════════════
 PAGE_MAP = {
@@ -906,6 +1102,8 @@ PAGE_MAP = {
     "시장 분석": page_market,
     "리스크 분석": page_risk,
     "전략 제언": page_strategy,
+    "🧬 디지털 트윈": page_digital_twin,
+    "🔬 3대 플랫폼": page_platforms,
 }
 
 PAGE_MAP[page]()
