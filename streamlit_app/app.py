@@ -35,7 +35,6 @@ PLOTLY_LAYOUT = dict(
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
     font=dict(family="Noto Sans KR, sans-serif", color=TEXT, size=13),
-    margin=dict(l=40, r=40, t=50, b=40),
 )
 
 
